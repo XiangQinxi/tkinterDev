@@ -1,0 +1,8 @@
+LICENSE
+README.md
+pyproject.toml
+setup.py
+tkinterDev.egg-info/PKG-INFO
+tkinterDev.egg-info/SOURCES.txt
+tkinterDev.egg-info/dependency_links.txt
+tkinterDev.egg-info/top_level.txt
