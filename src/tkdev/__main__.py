@@ -61,7 +61,7 @@ class devdemo(tk.Tk):
                 import tkinter as tk
                 import tkinter.ttk as ttk
 
-                root = dev.DevWindow()
+                root = dev.DevToplevel()
                 root.geometry("300x350")
                 statusbar = dev.DevStatusBar(root, default_text="状态栏 | ")
                 root.statusbar(statusbar)
