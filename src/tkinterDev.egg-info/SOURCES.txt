@@ -1,9 +1,12 @@
 LICENSE
 README.md
 pyproject.toml
+setup.py
+src/__init__.py
 src/tkdev/__init__.py
 src/tkdev/__main__.py
 src/tkdev/devdemo/__init__.py
+src/tkdev/devicon/__init__.py
 src/tkinterDev.egg-info/PKG-INFO
 src/tkinterDev.egg-info/SOURCES.txt
 src/tkinterDev.egg-info/dependency_links.txt
