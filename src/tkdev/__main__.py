@@ -1,5 +1,5 @@
 from tkdev import *
-from tkdev.devdemo import DevDrag_Demo, DevMenuBar_Demo, DevPopupWindow_Demo, DevStatusBar_Demo, DevSubWindow_Demo
+from tkdev.devdemo import DevAppBar_Demo, DevDrag_Demo, DevMenuBar_Demo, DevPopupWindow_Demo, DevStatusBar_Demo, DevSubWindow_Demo, DevToplevel_Demo
 
 
 class devdemo(tk.Tk):
@@ -21,8 +21,10 @@ class devdemo(tk.Tk):
         self.choices.pack(fill=tk.BOTH, side=tk.LEFT, expand=1)
         self.choices_yscroll.configure(command=self.choices.yview)
         self.choices_xscroll.configure(command=self.choices.xview)
-        for item in ["DevDrag", "DevMenuBar", "DevPopupWindow", "DevStatusBar",
+        for item in ["DevAccumulatorButton", "DevAppBar", "DevDrag", "DevImage",
+                     "DevMenu", "DevMenuBar", "DevPopupWindow", "DevStatusBar",
                      "DevSubWindow", "DevToolTip", "DevTitleBar", "DevWindow",
+                     "DevToplevel",
                      "All"]:
             self.choices.insert(tk.END, item)
         self.paned.add(self.choices_frame)

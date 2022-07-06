@@ -6,6 +6,21 @@ from ctypes import windll
 windll.user32.SetProcessDPIAware()
 
 
+class DevAccumulatorButton(tk.Button):
+    def __init__(self):
+        pass
+
+
+class DevAppBar(tk.Frame):
+    def __init__(self, master: tk.Widget = None, title: str = "",background="#ffffff", foreground="#000000"):
+        super(DevAppBar, self).__init__(master=master, relief=tk.FLAT, background=background)
+        self.title = tk.Label(self, text=title, justify=tk.LEFT, background=background, foreground=foreground)
+        self.title.pack(fill=tk.Y, side=tk.LEFT, padx=10, pady=5)
+
+    def show(self):
+        self.pack(fill=tk.X, ipadx=10, ipady=10)
+
+
 class DevDrag(object):
     def __init__(self, widget: tk.Widget, dragwidget: tk.Widget, iswindow: bool = False):
         """
@@ -52,12 +67,12 @@ class DevImage(tk.Label):
 
 
 class DevMenu(tk.Menubutton):
-    def __init__(self, master=None, menu: tk.Menu = None, text: str = "", bg="#f0f0f0", fg="#000000", active_bg="#3c7bfc", active_fg="#ffffff"):
+    def __init__(self, master=None, menu: tk.Menu = None, text: str = "", bg="#fafafa", fg="#000000", active_bg="#3c7bfc", active_fg="#ffffff"):
         super(DevMenu, self).__init__(master=master, menu=menu, text=text, relief=tk.FLAT, background=bg, foreground=fg, activebackground=active_bg, activeforeground=active_fg)
 
 
 class DevMenuBar(tk.Frame):
-    def __init__(self, master: tk.Widget, bg="#f0f0f0"):
+    def __init__(self, master: tk.Widget, bg="#fafafa"):
         super(DevMenuBar, self).__init__(master=master, background=bg)
 
     def add_menu(self, menu: DevMenu, side=tk.LEFT):
@@ -262,13 +277,16 @@ class DevTitleBar(tk.Frame):
     def widget_min(self):
         self.widget.place(x=self._x, y=self._y, width=self._width, height=self._height)
 
+    def show(self):
+        self.pack(fill=tk.X, side=tk.TOP)
+
 
 class DevWindow(tk.Tk):
     def __init__(self):
         super(DevWindow, self).__init__()
         self.title("tkDev")
         self.geometry("400x300")
-        self.configure(background="#f9f9f9")
+        self.configure(background="#f0f0f0")
 
     def wm_statusBar(self, statusBar: tk.Widget):
         self._statusBar = statusBar
@@ -335,12 +353,8 @@ class DevToplevel(tk.Toplevel):
 
 if __name__ == '__main__':
     Root = DevWindow()
-    MenuBar = DevMenuBar(Root)
-    Menu = DevMenu(master=MenuBar, text="Hello World")
-    MenuItem = tk.Menu(Menu)
-    Menu.configure(menu=MenuItem)
-    MenuItem.add_command(label="dasd")
-    MenuItem.add_separator()
-    MenuBar.add_menu(Menu, tk.RIGHT)
-    MenuBar.show()
+    TitleBar = DevTitleBar(Root, window=Root)
+    Root.titlebar(TitleBar)
+    AppBar = DevAppBar(Root, title="Hello World")
+    AppBar.show()
     Root.mainloop()

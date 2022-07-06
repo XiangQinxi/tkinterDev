@@ -1,4 +1,4 @@
-from tkdev import DevDrag, DevPopupWindow, DevStatusBar, DevSubWindow, DevToplevel
+from tkdev import DevAppBar, DevDrag, DevPopupWindow, DevStatusBar, DevSubWindow, DevToplevel
 from tkinter import *
 from tkinter import ttk, messagebox
 
@@ -9,6 +9,13 @@ windll.user32.SetProcessDPIAware()
 name = "tkdev"
 version = "1.5.0"
 
+
+class DevAppBar_Demo(DevToplevel):
+    def __init__(self):
+        super(DevAppBar_Demo, self).__init__()
+        self.appbar = DevAppBar(self, title="Hello World")
+        self.appbar.show()
+        self.mainloop()
 
 class DevDrag_Demo(DevToplevel):
     def __init__(self):
@@ -62,3 +69,7 @@ class DevSubWindow_Demo(DevToplevel):
 
         self.subwindow = DevSubWindow(self, title="DevSubWindow")
         self.subwindow.show()
+
+class DevToplevel(DevToplevel):
+    def __init__(self):
+        self.mainloop()
