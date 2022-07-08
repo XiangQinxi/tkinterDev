@@ -3,7 +3,32 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.tix as tix
 from ctypes import windll
+from os import environ
+
 windll.user32.SetProcessDPIAware()
+
+GWL_EXSTYLE = -20
+WS_EX_APPWINDOW = 0x00040000
+WS_EX_TOOLWINDOW = 0x00000080
+
+
+def add_taskbar(window):
+    if 'PROGRAMFILES(X86)' in environ:
+        hwnd = windll.user32.GetParent(window.winfo_id())
+        style = windll.user32.GetWindowLongPtrW(hwnd, GWL_EXSTYLE)
+        style = style & ~WS_EX_TOOLWINDOW
+        style = style | WS_EX_APPWINDOW
+        res = windll.user32.SetWindowLongPtrW(hwnd, GWL_EXSTYLE, style)
+        # re-assert the new window style
+    else:
+        hwnd = windll.user32.GetParent(window.winfo_id())
+        style = windll.user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
+        style = style & ~WS_EX_TOOLWINDOW
+        style = style | WS_EX_APPWINDOW
+        res = windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, style)
+        # re-assert the new window style
+    window.wm_withdraw()
+    window.after(10, lambda: window.wm_deiconify())
 
 
 class DevAccumulatorButton(tk.Button):
@@ -12,7 +37,7 @@ class DevAccumulatorButton(tk.Button):
 
 
 class DevAppBar(tk.Frame):
-    def __init__(self, master: tk.Widget = None, title: str = "",background="#ffffff", foreground="#000000"):
+    def __init__(self, master: tk.Widget = None, title: str = "", background="#ffffff", foreground="#000000"):
         super(DevAppBar, self).__init__(master=master, relief=tk.FLAT, background=background)
         self.title = tk.Label(self, text=title, justify=tk.LEFT, background=background, foreground=foreground)
         self.title.pack(fill=tk.Y, side=tk.LEFT, padx=10, pady=5)
@@ -115,14 +140,28 @@ class DevDocs(tk.PanedWindow):
         self.docscheck[list_name] = docs_text
 
 
+class DevExtend(tk.Frame):
+    def __init__(self, master: tk.Widget, label: tk.Widget = tk.Label, text: str = "", widget: tk.Widget = tk.Message):
+        super(DevExtend, self).__init__(master=master)
+        self.label = label
+        self.text = text
+        self.widget = widget
+
+        self.label.pack(fill=tk.X, side=tk.TOP)
+        self.extend_area = tk.Frame()
+        self.extend_area.pack(fill=tk.BOTH, expand=tk.YES)
+
+
 class DevImage(tk.Label):
-    def __init__(self, master: tk.Widget, image: tk.PhotoImage = None,):
+    def __init__(self, master: tk.Widget, image: tk.PhotoImage = None, ):
         super(DevImage, self).__init__(master=master, image=image)
 
 
 class DevMenu(tk.Menubutton):
-    def __init__(self, master=None, menu: tk.Menu = None, text: str = "", bg="#fafafa", fg="#000000", active_bg="#3c7bfc", active_fg="#ffffff"):
-        super(DevMenu, self).__init__(master=master, menu=menu, text=text, relief=tk.FLAT, background=bg, foreground=fg, activebackground=active_bg, activeforeground=active_fg)
+    def __init__(self, master=None, menu: tk.Menu = None, text: str = "", bg="#fafafa", fg="#000000",
+                 active_bg="#3c7bfc", active_fg="#ffffff"):
+        super(DevMenu, self).__init__(master=master, menu=menu, text=text, relief=tk.FLAT, background=bg, foreground=fg,
+                                      activebackground=active_bg, activeforeground=active_fg)
 
 
 class DevMenuBar(tk.Frame):
@@ -147,7 +186,8 @@ class DevPopupWindow(tk.Toplevel):
         super(DevPopupWindow, self).__init__(master=master)
         self.overrideredirect(True)
         self.withdraw()
-        widget.bind("<Button-1>", lambda event: self.popup(widget.winfo_x()+widget.winfo_width(), widget.winfo_y()+widget.winfo_height()))
+        widget.bind("<Button-1>", lambda event: self.popup(widget.winfo_x() + widget.winfo_width(),
+                                                           widget.winfo_y() + widget.winfo_height()))
         self.bind("<Button-3>", lambda event: self.withdraw())
 
     def popup(self, x=0, y=0):
@@ -202,7 +242,8 @@ class DevSubWindow(tk.Frame):
         :param titlebar_foreground:
         """
         super(DevSubWindow, self).__init__(master=master, background=background, borderwidth=1, relief=tk.RIDGE)
-        self.titlebar = DevTitleBar(master=self, iswindow=False, widget=self, title_bg=titlebar_background, title_fg=titlebar_foreground, title_label=title)
+        self.titlebar = DevTitleBar(master=self, iswindow=False, widget=self, title_bg=titlebar_background,
+                                    title_fg=titlebar_foreground, title_label=title)
         self.titlebar.pack(fill=tk.X, side=tk.TOP)
         DevDrag(self.titlebar, self)
 
@@ -260,6 +301,9 @@ class DevTitleBar(tk.Frame):
         self.max_bg = max_bg
         self.min = min
         self.min_bg = min_bg
+
+        self.ismax = False
+
         if self.title:
             self.add_title(title=self.title_label, title_bg=self.title_bg, title_fg=self.title_fg)
         if self.close:
@@ -311,17 +355,22 @@ class DevTitleBar(tk.Frame):
         self.window.destroy()
 
     def window_max(self):
-        self._x = self.window.winfo_x()
-        self._y = self.window.winfo_y()
-        self._width = self.window.winfo_width()
-        self._height = self.window.winfo_height()
-        self.window.geometry(f"{self.winfo_screenwidth()}x{self.winfo_screenheight()}+0+0")
-        self.window.attributes('-topmost', 1)
-        self.window.attributes('-topmost', 0)
-        self.window.geometry("+0+0")
+        if self.ismax:
+            self.window.geometry(f"{self._width}x{self._height}+{self._x}+{self._y}")
+            self.ismax = False
+        elif not self.ismax:
+            self._x = self.window.winfo_x()
+            self._y = self.window.winfo_y()
+            self._width = self.window.winfo_width()
+            self._height = self.window.winfo_height()
+            self.window.geometry(f"{self.winfo_screenwidth()}x{self.winfo_screenheight()}+0+0")
+            self.window.attributes('-topmost', 1)
+            self.window.attributes('-topmost', 0)
+            self.window.geometry("+0+0")
+            self.ismax = True
 
     def window_min(self):
-        self.window.geometry(f"{self._width}x{self._height}+{self._x}+{self._y}")
+        pass
 
     def widget_close(self):
         self.widget.destroy()
@@ -393,15 +442,7 @@ class DevWindow(tk.Tk):
         from ctypes import windll
         self.minsize(100, 30)
         self.overrideredirect(True)
-        GWL_EXSTYLE = -20
-        WS_EX_APPWINDOW = 0x00040000
-        WS_EX_TOOLWINDOW = 0x00000080
-        hwnd = windll.user32.GetParent(self.winfo_id())
-        style = windll.user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
-        style = style & ~WS_EX_TOOLWINDOW
-        style = style | WS_EX_APPWINDOW
-        res = windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, style)
-        # re-assert the new window style
+        self.after(10, lambda: add_taskbar(self))
         self._titlebar = titleBar
         self._titlebar.pack(fill=tk.X, side=tk.TOP)
         DevDrag(self._titlebar, self, True)
