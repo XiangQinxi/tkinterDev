@@ -15,7 +15,6 @@ class DevAppBar_Demo(DevToplevel):
         super(DevAppBar_Demo, self).__init__()
         self.appbar = DevAppBar(self, title="Hello World")
         self.appbar.show()
-        self.mainloop()
 
 class DevDrag_Demo(DevToplevel):
     def __init__(self):

@@ -21,6 +21,32 @@ class DevAppBar(tk.Frame):
         self.pack(fill=tk.X, ipadx=10, ipady=10)
 
 
+class DevButton(tk.Button):
+    def __init__(self, master, text: str = "", borderwidth: int = 0,
+                 default_bg="#ffffff", default_fg="#000000",
+                 active_bg="#177aff", active_fg="#d6eaff",
+                 click_bg="#175bff", click_fg="#d6deff"):
+        super(DevButton, self).__init__(master=master, relief=tk.FLAT, text=text, borderwidth=borderwidth)
+        self.default_bg = default_bg
+        self.default_fg = default_fg
+        self.active_bg = active_bg
+        self.active_fg = active_fg
+        self.click_bg = click_bg
+        self.click_fg = click_fg
+        self.bind("<Leave>", self.nofocus)
+        self.bind("<Enter>", self.focus)
+        self.bind("<Button-1>", self.click)
+
+    def nofocus(self, event=None):
+        self.configure(background=self.default_bg, foreground=self.default_fg)
+
+    def focus(self, event=None):
+        self.configure(background=self.active_bg, foreground=self.active_fg)
+
+    def click(self, event=None):
+        self.configure(activebackground=self.click_bg, activeforeground=self.click_fg)
+
+
 class DevDrag(object):
     def __init__(self, widget: tk.Widget, dragwidget: tk.Widget, iswindow: bool = False):
         """
@@ -51,6 +77,7 @@ class DevDrag(object):
         else:
             self.dragwidget.place(x=newx, y=newy, width=self.dragwidget.winfo_width(),
                                   height=self.dragwidget.winfo_height())
+        self.widget.update()
 
     def click(self, event=None):
         self.movex.set(event.x)
@@ -59,6 +86,33 @@ class DevDrag(object):
 
     def noclick(self, event=None):
         self.moved.set(False)
+
+
+class DevDocs(tk.PanedWindow):
+    def __init__(self, master: tk.Widget):
+        super(DevDocs, self).__init__(master=master, orient=tk.HORIZONTAL, height=3)
+        self.docsvar = tk.StringVar()
+        self.docsvar.set(())
+        self.docslist_area = tk.Frame(self)
+        self.docslist = tk.Listbox(self.docslist_area, listvariable=self.docsvar)
+        self.docslist.bind("<<ListboxSelect>>", self.check)
+        self.docslist.pack(fill=tk.BOTH, expand=tk.YES)
+        self.docscheck = {}
+        self.docstext_area = tk.Frame(self)
+        self.docstext = tk.Text(self.docstext_area)
+        self.docstext.pack(fill=tk.BOTH, expand=tk.YES)
+
+        self.add(self.docslist_area)
+        self.add(self.docstext_area)
+
+    def check(self, event=None):
+        self.docstext.delete("0.0", tk.END)
+        list = self.docslist.curselection()
+        self.docstext.insert("0.0", self.docscheck[list])
+
+    def add_docs(self, list_name: str = "", docs_text: str = ""):
+        self.docslist.insert(tk.END, list_name)
+        self.docscheck[list_name] = docs_text
 
 
 class DevImage(tk.Label):
@@ -99,6 +153,11 @@ class DevPopupWindow(tk.Toplevel):
     def popup(self, x=0, y=0):
         self.deiconify()
         self.geometry(f"+{x}+{y}")
+
+
+class DevResize(tk.Canvas):
+    def __init__(self):
+        pass
 
 
 class DevStatusBar(tk.Frame):
@@ -281,12 +340,12 @@ class DevTitleBar(tk.Frame):
         self.pack(fill=tk.X, side=tk.TOP)
 
 
-class DevWindow(tk.Tk):
+class DevToplevel(tk.Toplevel):
     def __init__(self):
-        super(DevWindow, self).__init__()
+        super(DevToplevel, self).__init__()
         self.title("tkDev")
         self.geometry("400x300")
-        self.configure(background="#f0f0f0")
+        self.configure(background="#f9f9f9")
 
     def wm_statusBar(self, statusBar: tk.Widget):
         self._statusBar = statusBar
@@ -316,12 +375,12 @@ class DevWindow(tk.Tk):
     titlebar = wm_titleBar
 
 
-class DevToplevel(tk.Toplevel):
+class DevWindow(tk.Tk):
     def __init__(self):
-        super(DevToplevel, self).__init__()
+        super(DevWindow, self).__init__()
         self.title("tkDev")
         self.geometry("400x300")
-        self.configure(background="#f9f9f9")
+        self.configure(background="#f0f0f0")
 
     def wm_statusBar(self, statusBar: tk.Widget):
         self._statusBar = statusBar

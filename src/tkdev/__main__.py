@@ -1,5 +1,5 @@
 from tkdev import *
-from tkdev.devdemo import DevAppBar_Demo, DevDrag_Demo, DevMenuBar_Demo, DevPopupWindow_Demo, DevStatusBar_Demo, DevSubWindow_Demo, DevToplevel_Demo
+from tkdev.devdemo import DevAppBar_Demo, DevDrag_Demo, DevMenuBar_Demo, DevPopupWindow_Demo, DevStatusBar_Demo, DevSubWindow_Demo
 
 
 class devdemo(tk.Tk):
@@ -43,7 +43,10 @@ class devdemo(tk.Tk):
         except tk.TclError:
             pass
         else:
-            if self.preview_list == "DevDrag":
+            if self.preview_list == "DevAppBar":
+                demo = DevAppBar_Demo()
+                demo.mainloop()
+            elif self.preview_list == "DevDrag":
                 demo = DevDrag_Demo()
                 demo.mainloop()
             elif self.preview_list == "DevMenuBar":
