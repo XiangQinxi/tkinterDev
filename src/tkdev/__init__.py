@@ -319,11 +319,11 @@ class DevTitleBar(tk.Frame):
 
         if self.iswindow:
             if self.close:
-                self.closebutton.configure(command=self.window_close)
+                self.closebutton.configure(command=self.widget_close)
             if self.max:
-                self.maxbutton.configure(command=self.window_max)
+                self.maxbutton.configure(command=self.widget_max)
             if self.min:
-                self.minbutton.configure(command=self.window_min)
+                self.minbutton.configure(command=self.widget_min)
         else:
             if self.close:
                 self.closebutton.configure(command=self.widget_close)
@@ -351,39 +351,45 @@ class DevTitleBar(tk.Frame):
                                    activeforeground="#ffffff")
         self.minbutton.pack(fill=tk.Y, side=self.button_side, ipadx=8)
 
-    def window_close(self):
-        self.window.destroy()
-
-    def window_max(self):
-        if self.ismax:
-            self.window.geometry(f"{self._width}x{self._height}+{self._x}+{self._y}")
-            self.ismax = False
-        elif not self.ismax:
-            self._x = self.window.winfo_x()
-            self._y = self.window.winfo_y()
-            self._width = self.window.winfo_width()
-            self._height = self.window.winfo_height()
-            self.window.geometry(f"{self.winfo_screenwidth()}x{self.winfo_screenheight()}+0+0")
-            self.window.attributes('-topmost', 1)
-            self.window.attributes('-topmost', 0)
-            self.window.geometry("+0+0")
-            self.ismax = True
-
-    def window_min(self):
-        pass
-
     def widget_close(self):
-        self.widget.destroy()
+        if self.iswindow:
+            self.window.destroy()
+        elif not self.iswindow:
+            self.widget.destroy()
 
     def widget_max(self):
-        self._x = self.widget.winfo_x()
-        self._y = self.widget.winfo_y()
-        self._width = self.widget.winfo_width()
-        self._height = self.widget.winfo_height()
-        self.widget.place(x=0, y=0, width=self.widget.master.winfo_width(), height=self.widget.master.winfo_height())
+        if self.iswindow:
+            if self.ismax:
+                self.window.geometry(f"{self._width}x{self._height}+{self._x}+{self._y}")
+                self.ismax = False
+            elif not self.ismax:
+                self._x = self.window.winfo_x()
+                self._y = self.window.winfo_y()
+                self._width = self.window.winfo_width()
+                self._height = self.window.winfo_height()
+                self.window.geometry(f"{self.winfo_screenwidth()}x{self.winfo_screenheight()}+0+0")
+                self.window.attributes('-topmost', 1)
+                self.window.attributes('-topmost', 0)
+                self.window.geometry("+0+0")
+                self.ismax = True
+            self.window.update()
+        if not self.iswindow:
+            if self.ismax:
+                self.widget.place(width=self._width, height=self._height, x=self._x, y=self._y)
+                self.ismax = False
+            elif not self.ismax:
+                self._x = self.widget.winfo_x()
+                self._y = self.widget.winfo_y()
+                self._width = self.widget.winfo_width()
+                self._height = self.widget.winfo_height()
+                self.widget.place(width=self.widget.master.winfo_width(), height=self.widget.master.winfo_height(), x=0, y=0)
+                self.widget.place(x=0, y=0)
+                self.ismax = True
+            self.widget.update()
+        self.update()
 
     def widget_min(self):
-        self.widget.place(x=self._x, y=self._y, width=self._width, height=self._height)
+        pass
 
     def show(self):
         self.pack(fill=tk.X, side=tk.TOP)
@@ -394,7 +400,7 @@ class DevToplevel(tk.Toplevel):
         super(DevToplevel, self).__init__()
         self.title("tkDev")
         self.geometry("400x300")
-        self.configure(background="#f9f9f9")
+        self.configure(background="#f0f0f0")
 
     def wm_statusBar(self, statusBar: tk.Widget):
         self._statusBar = statusBar
@@ -407,15 +413,7 @@ class DevToplevel(tk.Toplevel):
         from ctypes import windll
         self.minsize(100, 30)
         self.overrideredirect(True)
-        GWL_EXSTYLE = -20
-        WS_EX_APPWINDOW = 0x00040000
-        WS_EX_TOOLWINDOW = 0x00000080
-        hwnd = windll.user32.GetParent(self.winfo_id())
-        style = windll.user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
-        style = style & ~WS_EX_TOOLWINDOW
-        style = style | WS_EX_APPWINDOW
-        res = windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, style)
-        # re-assert the new window style
+        self.after(10, lambda: add_taskbar(self))
         self._titlebar = titleBar
         self._titlebar.pack(fill=tk.X, side=tk.TOP)
         DevDrag(self._titlebar, self, True)

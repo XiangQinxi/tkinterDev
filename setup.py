@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="tkinterDev",
-    version="1.8.2",
+    version="1.8.4",
     author="XiangQinxi",
     author_email="XiangQinxi@outlook.com",
     description="tkinter Tool",
