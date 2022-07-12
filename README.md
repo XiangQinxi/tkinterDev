@@ -3,9 +3,9 @@
 `tkinter`高级工具包，实现了许多高级功能，我会持续更新的。😁😁😁
 ____
 ## 版本信息
-请使用最新的稳定版，虽然最新版可以用，但不排除会出现一些不可免得错误，请按照下方标准进行安装。🐋🐳🐋🐳
-- 不稳定版本 1.0.0 - 1.5.0、 1.8.3
-- 最新稳定版本 1.8.4
+请使用最新的稳定版，虽然最新版可以用，但不排除会出现一些不可免得错误，大版本更新有时会出现BUG，但是小版本可以考虑，因为小版本是对大版本的优化和改正，请按照下方标准进行安装。🐋🐳🐋🐳
+- 不稳定版本 1.0.0 - 1.5.0 1.8.3 - 1.8.4
+- 最新稳定版本 1.9.1
 - 最低稳定版本 1.6.0
  
 1.6.0 稳定版发布。
@@ -21,6 +21,20 @@ ____
 1.8.3 `DevTitleBar`优化。
 
 1.8.4 `DevToplevel`修正。
+
+1.8.5 `DevTitleBar`修正，真的最后一次修正了！
+
+1.8.6 `DevWindow`优化，可以选择是否将窗口显示在任务栏。
+
+1.8.7 `DevWindow`优化，可以使用`centre()`将窗口居中。
+
+1.8.8 `DevTitleBar`优化，双击窗口放大。
+
+1.9.0 正式稳定更新，组件参数各种优化，添加`DevSideBar`组件。
+
+1.9.1 文档改正。
+
+1.9.2 `DevTitleBar`修正最大化按钮和最小化按钮的的事件特征。
 ____
 
 ## devdemo
@@ -35,7 +49,7 @@ ____
 
 ```python
 
-from src import tkdev as dev
+import tkdev as dev
 import tkinter as tk
 
 if __name__ == '__main__':
@@ -54,7 +68,7 @@ if __name__ == '__main__':
 
 ```python
 
-from src import tkdev as dev
+import tkdev as dev
 
 dev.DevDrag(widget, window, iswindow=true)
 ```
@@ -65,7 +79,7 @@ ____
 
 ```python
 
-from src import tkdev as dev
+import tkdev as dev
 import tkinter as tk
 
 if __name__ == '__main__':
@@ -84,7 +98,7 @@ ____
 
 ```python
 
-from src import tkdev as dev
+import tkdev as dev
 import tkinter as tk
 
 if __name__ == '__main__':
@@ -98,3 +112,5 @@ if __name__ == '__main__':
 ### 运行问题❓
 1.为什么我用`DevTitleBa`r时标题没有出现？答：这个组件的参数`title`并不是直接写入标题参数，而是需要用`title_label`参数设置标题栏的标题，因为`title`参数是决定是否显示标题栏的参数，写True则显示标题栏，反之隐藏。
 ____
+
+## DevStatusBar
