@@ -44,6 +44,7 @@ def resize_widget(widget: tk.Widget):
     except tk.TclError:
         pass
 
+
 class DevAccumulatorButton(tk.Button):
     def __init__(self):
         super(DevAccumulatorButton, self).__init__()
@@ -61,7 +62,8 @@ class DevAppBar(tk.Frame):
 
 
 class DevButton(tk.Button):
-    def __init__(self, master, text: str = "", borderwidth: int = 0, image=None, font=("等线 Light", 10, "bold"), command=None,
+    def __init__(self, master, text: str = "", borderwidth: int = 0, image=None, font=("等线 Light", 10, "bold"),
+                 command=None,
                  default_bg="#ffffff", default_fg="#000000",
                  active_bg="#177aff", active_fg="#d6eaff",
                  click_bg="#175bff", click_fg="#d6deff"):
@@ -209,6 +211,20 @@ class DevMenuBar(tk.Frame):
 
     def show(self):
         self.pack(fill=tk.X, side=tk.TOP)
+
+
+class DevObject(object):
+    def __init__(self):
+        self.obj = {}
+
+    def add_widget(self, widget: tk.Widget, id: str):
+        self.obj[id] = widget
+
+    def set_widget(self, id: str, widget: tk.Widget):
+        self.obj[id] = widget
+
+    def get_widget(self, id: str) -> tk.Widget:
+        return self.obj[id]
 
 
 class DevPopupWindow(tk.Toplevel):
@@ -435,9 +451,11 @@ class DevTitleBar(tk.Frame):
             self.add_close(close_bg=self.close_bg, close_fg=self.close_fg, close_active_bg=self.close_active_bg,
                            close_active_fg=self.close_active_fg, close_func=self.close_func)
         if self.max:
-            self.add_max(max_bg=self.max_bg, max_fg=self.max_fg, max_active_bg=self.max_active_bg, max_active_fg=self.max_active_fg)
+            self.add_max(max_bg=self.max_bg, max_fg=self.max_fg, max_active_bg=self.max_active_bg,
+                         max_active_fg=self.max_active_fg)
         if self.min:
-            self.add_min(min_bg=self.min_bg, min_fg=self.min_fg, min_active_bg=self.min_active_bg, min_active_fg=self.min_active_fg)
+            self.add_min(min_bg=self.min_bg, min_fg=self.min_fg, min_active_bg=self.min_active_bg,
+                         min_active_fg=self.min_active_fg)
         self.widget = widget
         DevDrag(self, self.widget)
         self.window = window
@@ -533,7 +551,7 @@ class DevTitleBar(tk.Frame):
             else:
                 self.image = tk.Label(self.minwindow, image=tk.PhotoImage(file=self.minwindow_icon))
                 self.image.pack(fill=tk.BOTH, expand=tk.YES, padx=5, pady=5)
-            resize = DevResize(self.minwindow, border_color=self.minwindow_border_color)
+            resize = DevBorder(self.minwindow, border_color=self.minwindow_border_color)
             add_taskbar(self.minwindow)
             self.minwindow.attributes("-topmost", True)
             DevDrag(self.minwindow, self.minwindow, iswindow=True)
@@ -663,6 +681,5 @@ class DevWindow(tk.Tk):
 
 if __name__ == '__main__':
     Root = DevWindow()
-    DevToast(Root).show_toast()
     Root.centre()
     Root.mainloop()

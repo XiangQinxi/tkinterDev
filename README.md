@@ -39,6 +39,8 @@ ____
 2.0.0 添加`DevResize`，可以通过`DevResize`来移动组件。
 
 2.0.1 修正`DevResize`，在组件被消除时，将会批次销毁按钮组件
+
+2.0.2 修改一些BUG，添加`DevObject`组件，用于管理组件。
 ____
 
 ## devdemo
