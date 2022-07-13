@@ -69,12 +69,15 @@ def move(widget, x=None, y=None, width=None, height=None):
 def _mousedown(event):
     if event.widget not in bound: return
     lst = bound[event.widget]
-    for data in lst:  # 开始拖动时, 在每一个控件记录位置和控件尺寸
-        widget = data[1]
-        widget.mousex, widget.mousey = getpos()
-        widget.startx, widget.starty = widget.winfo_x(), widget.winfo_y()
-        widget.start_w = widget.winfo_width()
-        widget.start_h = widget.winfo_height()
+    try:
+        for data in lst:  # 开始拖动时, 在每一个控件记录位置和控件尺寸
+            widget = data[1]
+            widget.mousex, widget.mousey = getpos()
+            widget.startx, widget.starty = widget.winfo_x(), widget.winfo_y()
+            widget.start_w = widget.winfo_width()
+            widget.start_h = widget.winfo_height()
+    except tk.TclError:
+        pass
 
 
 def _drag(event):
@@ -101,7 +104,10 @@ def _resize(event):
     type = data[0].lower()
     minw, minh = data[2:4]
     if 's' in type:
-        move(widget, height=max(widget.start_h + dy, minh))
+        try:
+            move(widget, height=max(widget.start_h + dy, minh))
+        except AttributeError:
+            pass
     elif 'n' in type:
         move(widget, y=min(widget.starty + dy, widget.starty + widget.start_h - minh),
              height=max(widget.start_h - dy, minh))
@@ -218,8 +224,15 @@ class DevResize(object):
         def adjust_button(event=None):
             # 改变大小或拖动后,调整手柄位置
             for b in btns:
-                x, y = b._func()
-                b.place(x=x, y=y)
+                try:
+                    x, y = b._func()
+                except tk.TclError:
+                    for b in btns:
+                        b.destroy()
+                try:
+                    b.place(x=x, y=y)
+                except UnboundLocalError:
+                    pass
 
         self.widget.bind('<B1-Motion>', adjust_button, add='+')
         self.master.update()

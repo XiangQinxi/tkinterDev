@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: tkinterDev
-Version: 2.0.2
+Version: 2.0.4
 Summary: tkinter Tool
 Home-page: https://xiangqinxidevelopment.jetbrains.space/p/tkinterdev
 Author: XiangQinxi
@@ -54,6 +54,10 @@ ____
 2.0.1 修正`DevResize`，在组件被消除时，将会批次销毁按钮组件
 
 2.0.2 修改一些BUG，添加`DevObject`组件，用于管理组件。
+
+2.0.3 修正错误。
+
+2.0.4 修正错误。
 ____
 
 ## devdemo

@@ -1,4 +1,4 @@
-import tkinterDev.src.tkdev as dev
+import tkdev as dev
 import tkinter as tk
 
 
