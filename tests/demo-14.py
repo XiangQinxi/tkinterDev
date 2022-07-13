@@ -1,4 +1,4 @@
-from src.tkdev import *
+from tkinterDev.src.tkdev import *
 
 
 class PyFactory(DevWindow):
@@ -28,7 +28,7 @@ class PyFactory(DevWindow):
         self.titlebar_run = DevButton(self.devtitlebar, text="▷", default_bg="#21252b", default_fg="#c5c7cd", active_bg="#17deff", click_bg="#17ceff")
         self.titlebar_run.pack(side=tk.RIGHT, ipadx=5, ipady=3, padx=3)
         self.devstatusbar = DevStatusBar(self, "状态栏 | ", background="#21252b", foreground="#c5c7cd")
-        Resize = DevResize(self, border_color="#35384b")
+        Resize = DevBorder(self, border_color="#35384b")
         self.titlebar(self.devtitlebar, showtask=True)
         self.statusbar(self.devstatusbar)
         self.sidebar = DevSideBar(self, background="#21252b")

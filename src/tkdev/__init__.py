@@ -2,6 +2,7 @@ import tktooltip
 import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.tix as tix
+from tkdev.devresize import DevResize
 from ctypes import windll
 from os import environ
 
@@ -37,8 +38,15 @@ def window_centre(window: tk.Tk):
     window.geometry(f"{window.winfo_width()}x{window.winfo_height()}+{round(x)}+{round(y)}")
 
 
+def resize_widget(widget: tk.Widget):
+    try:
+        widget.after(10, lambda: DevResize(widget))
+    except tk.TclError:
+        pass
+
 class DevAccumulatorButton(tk.Button):
     def __init__(self):
+        super(DevAccumulatorButton, self).__init__()
         pass
 
 
@@ -84,7 +92,8 @@ class DevDrag(object):
     def __init__(self, widget: tk.Widget, dragwidget: tk.Widget, iswindow: bool = False, x: bool = True, y: bool = True,
                  click_func=None, noclick_func=None, move_func=None):
         """
-        这个组件能够拖动组件移动，实现更高级的功能 \n widget设为拖动命令的组件，你拖动这个组件，拖动的组件会移动 \n dragwidget设为被拖动的组件 \n iswindow是声明你要拖动的组件是窗口还是组件，是窗口填True，是组件填False
+        这个组件能够拖动组件移动，实现更高级的功能 \n widget设为拖动命令的组件，你拖动这个组件，拖动的组件会移动 \n dragwidget设为被拖动的组件 \n
+        iswindow是声明你要拖动的组件是窗口还是组件，是窗口填True，是组件填False
 
         :param widget:
         :param dragwidget:
@@ -145,7 +154,6 @@ class DevDocs(tk.PanedWindow):
     def __init__(self, master: tk.Widget):
         super(DevDocs, self).__init__(master=master, orient=tk.HORIZONTAL, height=3)
         self.docsvar = tk.StringVar()
-        self.docsvar.set(())
         self.docslist_area = tk.Frame(self)
         self.docslist = tk.Listbox(self.docslist_area, listvariable=self.docsvar)
         self.docslist.bind("<<ListboxSelect>>", self.check)
@@ -223,7 +231,7 @@ class DevPopupWindow(tk.Toplevel):
         self.geometry(f"+{x}+{y}")
 
 
-class DevResize(object):
+class DevBorder(object):
     def __init__(self, widget: tk.Widget = None, iswindow: bool = True, border_color="#e1e1e1"):
         self.widget = widget
         self.iswindow = iswindow
@@ -341,7 +349,9 @@ class DevSubWindow(tk.Frame):
                                     min_active_fg=min_active_fg,
                                     close_fg=close_fg, max_fg=max_fg, min_fg=min_fg)
         self.titlebar.pack(fill=tk.X, side=tk.TOP)
-        DevDrag(self.titlebar, self)
+        self.bind("Configure", DevResize)
+        resize_widget(self)
+        self.update()
 
     def set_titlebar(self, titlebar):
         self.titlebar = titlebar
@@ -540,9 +550,33 @@ class DevTitleBar(tk.Frame):
         self.pack(fill=tk.X, side=tk.TOP)
 
 
+class DevToast(tk.Toplevel):
+    def __init__(self, master: tk.Tk = None,
+                 title: str = "Title", message: str = "Message", height: int = 80):
+        super(DevToast, self).__init__(master=master)
+        self.overrideredirect(True)
+        self.title = tk.Label(self, text=title, justify=tk.LEFT, anchor=tk.W)
+        self.title.pack(side=tk.TOP, fill=tk.X)
+        self.message = tk.Label(self, text=message, justify=tk.LEFT, anchor=tk.W)
+        self.message.pack(side=tk.TOP, fill=tk.X)
+        self.height = height
+        self.withdraw()
+
+    def show_toast(self):
+        x = 20
+        y = 20
+        width = self.winfo_screenwidth() - x * 2
+        height = self.height
+
+        self.deiconify()
+
+        self.geometry(f"{round(width)}x{round(height)}+{x}+{y}")
+        self.attributes("-topmost", True)
+
+
 class DevToplevel(tk.Toplevel):
-    def __init__(self):
-        super(DevToplevel, self).__init__()
+    def __init__(self, master: tk.Tk = None):
+        super(DevToplevel, self).__init__(master=master)
         self.title("tkDev")
         self.geometry("500x500")
         self.configure(background="#f0f0f0")
@@ -629,6 +663,6 @@ class DevWindow(tk.Tk):
 
 if __name__ == '__main__':
     Root = DevWindow()
-    Resize = DevResize(Root)
+    DevToast(Root).show_toast()
     Root.centre()
     Root.mainloop()

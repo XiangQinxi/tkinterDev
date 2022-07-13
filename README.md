@@ -35,6 +35,10 @@ ____
 1.9.1 文档改正。
 
 1.9.2 `DevTitleBar`修正最大化按钮和最小化按钮的的事件特征。
+
+2.0.0 添加`DevResize`，可以通过`DevResize`来移动组件。
+
+2.0.1 修正`DevResize`，在组件被消除时，将会批次销毁按钮组件
 ____
 
 ## devdemo
@@ -74,6 +78,23 @@ dev.DevDrag(widget, window, iswindow=true)
 ```
 ____
 
+## DevResize
+可以通过拖拽旁边的按钮来修改组件的大小。
+```python
+import tkdev as dev
+import tkinter as tk
+
+if __name__ == '__main__':
+    root = tk.Tk() 
+    root.geometry("500x500")
+    button = tk.Button(root)
+    button.place(x=10, y=10, width=480, height=480)
+    dev.DevResize(widget=button)
+    root.mainloop()
+```
+
+____
+
 ## DevSubWindow🤖
 在`Qt`里可以使用`MDI`这个组件制作子窗口，而tkinter中未实现这个功能，而我又想制作`tkinter`的设计器，需要子窗口功能，于是我就自己做了一个，里面都是有`tkinter`组件做的，并非`ttk`。不是我不想要漂亮的界面，而是我发现使用`ttk`，按钮的边框太长了，显得不美观，于是就用`tk`组件了。
 
@@ -93,6 +114,7 @@ if __name__ == '__main__':
 ### 运行问题❓
 1.暂无，等待反馈
 ____
+
 ## DevTitleBar和DevWindow
 这两个组件需要一起搭配着进行使用最好，`DevWindow`的`wm_titlebar`可以设置标题栏，而`DevTitleBar`做的标题栏与`DevWindow`正好很搭配。
 
