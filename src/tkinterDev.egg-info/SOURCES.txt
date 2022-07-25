@@ -2,7 +2,6 @@ LICENSE
 README.md
 pyproject.toml
 setup.py
-src/__init__.py
 src/tkdev/__init__.py
 src/tkdev/__main__.py
 src/tkdev/devcore/__init__.py

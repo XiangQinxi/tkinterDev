@@ -1,35 +1,129 @@
-import tktooltip
+try:
+    import tktooltip
+except ImportError:
+    pass
 import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.tix as tix
 from tkdev.devresize import DevResize
+from tkdev.devicon import Icon_Empty
 from ctypes import windll
 from os import environ
 
+try:
+    from win32gui import *
+    from win32con import *
+    from win32api import *
+except ImportError:
+    pass
+
 windll.user32.SetProcessDPIAware()
 
-GWL_EXSTYLE = -20
-WS_EX_APPWINDOW = 0x00040000
-WS_EX_TOOLWINDOW = 0x00000080
+taskbar_height = GetMonitorInfo(MonitorFromPoint((0, 0))).get("Monitor")[3] - \
+                 GetMonitorInfo(MonitorFromPoint((0, 0))).get("Work")[3]
 
 
-def add_taskbar(window):
-    if 'PROGRAMFILES(X86)' in environ:
-        hwnd = windll.user32.GetParent(window.winfo_id())
-        style = windll.user32.GetWindowLongPtrW(hwnd, GWL_EXSTYLE)
-        style = style & ~WS_EX_TOOLWINDOW
-        style = style | WS_EX_APPWINDOW
-        res = windll.user32.SetWindowLongPtrW(hwnd, GWL_EXSTYLE, style)
-        # re-assert the new window style
-    else:
-        hwnd = windll.user32.GetParent(window.winfo_id())
-        style = windll.user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
-        style = style & ~WS_EX_TOOLWINDOW
-        style = style | WS_EX_APPWINDOW
-        res = windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, style)
-        # re-assert the new window style
+def window_pos_bottom_right(window: tk.Tk, padx: int = 15, pady: int = 15):
+    window.after(1, lambda: window.geometry(
+        f"+{window.winfo_screenwidth() - window.winfo_width() - padx - 10}+{window.winfo_screenheight() - taskbar_height - window.winfo_height() - pady - 35}"))
+
+
+def window_pos_bottom_left(window: tk.Tk, padx: int = 15, pady: int = 15):
+    window.after(1, lambda: window.geometry(
+        f"+{padx}+{window.winfo_screenheight() - taskbar_height - window.winfo_height() - pady - 35}"))
+
+
+def window_pos_top_right(window: tk.Tk, padx: int = 15, pady: int = 15):
+    window.after(1, lambda: window.geometry(
+        f"+{window.winfo_screenwidth() - window.winfo_width() - padx - 10}+{pady}"))
+
+
+def window_pos_top_left(window: tk.Tk, padx: int = 15, pady: int = 15):
+    window.after(1, lambda: window.geometry(
+        f"+{padx}+{pady}"))
+
+
+def window_sizebox(window: tk.Tk):
+    def sizebox():
+        hwnd = GetParent(window.winfo_id())
+        res = SetWindowLong(hwnd, GWL_STYLE, GetWindowLong(hwnd, GWL_STYLE) & ~WS_SIZEBOX)
+
+    window.after(1, sizebox)
+
+
+def window_maxbox(window: tk.Tk):
+    def max():
+        hwnd = GetParent(window.winfo_id())
+        res = SetWindowLong(hwnd, GWL_STYLE, GetWindowLong(hwnd, GWL_STYLE) & ~WS_MAXIMIZEBOX)
+
+    window.after(1, max)
+
+
+def window_minbox(window: tk.Tk):
+    def min():
+        hwnd = GetParent(window.winfo_id())
+        res = SetWindowLong(hwnd, GWL_STYLE, GetWindowLong(hwnd, GWL_STYLE) & ~WS_MINIMIZEBOX)
+
+    window.after(1, min)
+
+
+def window_grayed_closebox(window: tk.Tk):
+    def close():
+        hwnd = GetParent(window.winfo_id())
+        res = EnableMenuItem(GetSystemMenu(hwnd, False), SC_CLOSE, MF_BYCOMMAND | MF_GRAYED)
+
+    window.after(1, max)
+
+
+def window_enabled_closebox(window: tk.Tk):
+    def close():
+        hwnd = GetParent(window.winfo_id())
+        res = EnableMenuItem(GetSystemMenu(hwnd, False), SC_CLOSE, MF_BYCOMMAND | MF_ENABLED)
+
+    window.after(1, max)
+
+
+def window_popup(window: tk.Tk):
+    def popup():
+        hwnd = GetParent(window.winfo_id())
+        res = SetWindowLong(hwnd, GWL_STYLE, GetWindowLong(hwnd, GWL_STYLE) & ~WS_POPUPWINDOW)
+
+    window.after(1, popup)
+
+
+def window_custom_taskbar(window: tk.Tk):
+    def over():
+        hwnd = GetParent(window.winfo_id())
+        res = SetWindowLong(hwnd, GWL_STYLE, GetWindowLong(hwnd, GWL_STYLE) & ~WS_OVERLAPPEDWINDOW)
+
+    window.after(1, over)
+    window.update()
+
+
+def window_custom_border_taskbar(window: tk.Tk):
+    def custom():
+        hwnd = GetParent(window.winfo_id())
+        res = SetWindowLong(hwnd, GWL_STYLE, GetWindowLong(hwnd, GWL_STYLE) & ~WS_BORDER)
+
+    window.after(1, custom)
+    window.update()
+
+
+def window_add_taskbar(window: tk.Tk):
+    hwnd = GetParent(window.winfo_id())
+    res = SetWindowLong(hwnd, GWL_EXSTYLE, GetWindowLong(hwnd, GWL_EXSTYLE) & ~WS_EX_TOOLWINDOW | WS_EX_APPWINDOW)
+    # re-assert the new window style
     window.wm_withdraw()
-    window.after(10, lambda: window.wm_deiconify())
+    window.after(1, lambda: window.wm_deiconify())
+
+
+def window_embed(window: tk.Tk, toplevel: tk.Toplevel):
+    def embed():
+        SetParent(GetParent(toplevel.winfo_id()), window.winfo_id())
+        window.attributes("-topmost", False)
+
+    window.attributes("-topmost", True)
+    window.after(1, embed)
 
 
 def window_centre(window: tk.Tk):
@@ -38,9 +132,15 @@ def window_centre(window: tk.Tk):
     window.geometry(f"{window.winfo_width()}x{window.winfo_height()}+{round(x)}+{round(y)}")
 
 
-def resize_widget(widget: tk.Widget):
+def window_custom(window: tk.Tk):
+    hwnd = GetParent(window.winfo_id())
+    res = SetWindowLong(hwnd, GWL_STYLE, GetWindowLong(hwnd, GWL_STYLE) & ~WS_CAPTION)
+    window.update()
+
+
+def resize_widget(widget: tk.Widget, size: int = 10):
     try:
-        widget.after(10, lambda: DevResize(widget))
+        widget.after(1, lambda: DevResize(widget, size=size))
     except tk.TclError:
         pass
 
@@ -278,6 +378,30 @@ class DevBorder(object):
             self.widget.geometry(f"{self.widget.winfo_width()}x{self.bottom.winfo_y()}")
 
 
+class DevStack(tk.Frame):
+    def __init__(self):
+        super(DevStack, self).__init__()
+        self._pages = {}
+
+    def add_page(self, page: tk.Widget, id: int = 0):
+        self._pages[id] = page
+
+    def show_page(self, id: int):
+        self._pages[id].pack(fill=tk.BOTH, expand=tk.YES)
+        for item in self._pages.keys():
+            if not item == id:
+                self.hide_page(item)
+                print("Hide" + str(item))
+            else:
+                print("Show" + str(item))
+
+    def hide_page(self, id: int):
+        self._pages[id].pack_forget()
+
+    def get_pages(self):
+        return self._pages
+
+
 class DevSideBar(tk.Frame):
     def __init__(self, master: tk.Widget, background="#ffffff", ):
         super(DevSideBar, self).__init__(master=master, background=background)
@@ -335,7 +459,7 @@ class DevStatusBar(tk.Frame):
 
 
 class DevSubWindow(tk.Frame):
-    def __init__(self, master, title_label: str = "Title", background="white",
+    def __init__(self, master, title_label: str = "Title", background="white", resize_size: int = 10,
                  button_side=tk.RIGHT,
                  titlebar_background="white",
                  close: bool = True, max: bool = True, min: bool = True, title: bool = True,
@@ -366,7 +490,7 @@ class DevSubWindow(tk.Frame):
                                     close_fg=close_fg, max_fg=max_fg, min_fg=min_fg)
         self.titlebar.pack(fill=tk.X, side=tk.TOP)
         self.bind("Configure", DevResize)
-        resize_widget(self)
+        resize_widget(self, size=resize_size)
         self.update()
 
     def set_titlebar(self, titlebar):
@@ -516,7 +640,9 @@ class DevTitleBar(tk.Frame):
                 self._y = self.window.winfo_y()
                 self._width = self.window.winfo_width()
                 self._height = self.window.winfo_height()
-                self.window.geometry(f"{self.winfo_screenwidth()}x{self.winfo_screenheight()}+0+0")
+                monitor_info = GetMonitorInfo(MonitorFromPoint((0, 0)))
+                work_area = monitor_info.get("Work")
+                self.window.geometry(f"{work_area[2]}x{work_area[3]}+0+0")
                 self.window.attributes('-topmost', 1)
                 self.window.attributes('-topmost', 0)
                 self.window.geometry("+0+0")
@@ -563,6 +689,11 @@ class DevTitleBar(tk.Frame):
                 self.window.attributes("-topmost", False)
 
             self.minwindow.bind("<Double-Button-1>", show_window)
+        if not self.iswindow:
+            try:
+                self.window.withdraw()
+            except tk.TclError:
+                pass
 
     def show(self):
         self.pack(fill=tk.X, side=tk.TOP)
@@ -595,29 +726,55 @@ class DevToast(tk.Toplevel):
 class DevToplevel(tk.Toplevel):
     def __init__(self, master: tk.Tk = None):
         super(DevToplevel, self).__init__(master=master)
-        self.title("tkDev")
-        self.geometry("500x500")
-        self.configure(background="#f0f0f0")
+        self.title("")
+        self.geometry("630x300")
+        self.configure(background="#ffffff")
+        self.iconbitmap(Icon_Empty)
 
-    def wm_statusBar(self, statusBar: tk.Widget):
+    def wm_remove_titlebar(self):
+        self.after(0, lambda: window_custom_border_taskbar(self))
+
+    remove_titlebar = wm_remove_titlebar
+
+    def wm_remove_titlebar_none_border(self):
+        window_custom_taskbar(self)
+
+    remove_titlebar_none_border = wm_remove_titlebar_none_border
+
+    def wm_run(self):
+        try:
+            self.mainloop()
+        except tk.TclError:
+            return False
+        else:
+            return True
+
+    run = wm_run
+
+    def wm_statusbar(self, statusBar: tk.Widget = None):
         self._statusBar = statusBar
         self._statusBar.pack(fill=tk.X, side=tk.BOTTOM)
         return self._statusBar
 
-    statusbar = wm_statusBar
+    statusbar = wm_statusbar
 
-    def wm_titleBar(self, titleBar: tk.Label, showtask: bool = True):
-        from ctypes import windll
+    def wm_titlebar(self, titleBar: tk.Label = None, overtitlebar: bool = True, border: bool = True):
         self.minsize(100, 30)
-        self.overrideredirect(True)
-        if showtask:
-            self.after(10, lambda: add_taskbar(self))
+        if overtitlebar:
+            window_add_taskbar(self)
+        if border:
+            self.remove_titlebar()
         self._titlebar = titleBar
         self._titlebar.pack(fill=tk.X, side=tk.TOP)
         DevDrag(self._titlebar, self, True)
         return self._titlebar
 
-    titlebar = wm_titleBar
+    titlebar = wm_titlebar
+
+    def wm_menubar(self, menubar: DevMenuBar = None):
+        menubar.show()
+
+    menubar = wm_menubar
 
     def wm_centre(self):
         self.after(1, lambda evt=None: window_centre(self))
@@ -636,23 +793,39 @@ class DevToplevel(tk.Toplevel):
 class DevWindow(tk.Tk):
     def __init__(self):
         super(DevWindow, self).__init__()
-        self.title("tkDev")
-        self.geometry("500x500")
-        self.configure(background="#f0f0f0")
+        self.title("")
+        self.geometry("630x300")
+        self.configure(background="#ffffff")
+        self.iconbitmap(Icon_Empty)
 
-    def wm_statusbar(self, statusBar: tk.Widget):
+    def wm_remove_titlebar(self):
+        self.after(0, lambda: window_custom_border_taskbar(self))
+
+    remove_titlebar = wm_remove_titlebar
+
+    def wm_remove_titlebar_none_border(self):
+        window_custom_taskbar(self)
+
+    remove_titlebar_none_border = wm_remove_titlebar_none_border
+
+    def wm_run(self):
+        self.mainloop()
+
+    run = wm_run
+
+    def wm_statusbar(self, statusBar: tk.Widget = None):
         self._statusBar = statusBar
         self._statusBar.pack(fill=tk.X, side=tk.BOTTOM)
         return self._statusBar
 
     statusbar = wm_statusbar
 
-    def wm_titlebar(self, titleBar: tk.Label, showtask: bool = True):
-        from ctypes import windll
+    def wm_titlebar(self, titleBar: tk.Label = None, overtitlebar: bool = True, border: bool = True):
         self.minsize(100, 30)
-        self.overrideredirect(True)
-        if showtask:
-            self.after(10, lambda: add_taskbar(self))
+        if overtitlebar:
+            window_add_taskbar(self)
+        if border:
+            self.remove_titlebar()
         self._titlebar = titleBar
         self._titlebar.pack(fill=tk.X, side=tk.TOP)
         DevDrag(self._titlebar, self, True)
@@ -660,7 +833,7 @@ class DevWindow(tk.Tk):
 
     titlebar = wm_titlebar
 
-    def wm_menubar(self, menubar: DevMenuBar):
+    def wm_menubar(self, menubar: DevMenuBar = None):
         menubar.show()
 
     menubar = wm_menubar
@@ -681,5 +854,4 @@ class DevWindow(tk.Tk):
 
 if __name__ == '__main__':
     Root = DevWindow()
-    Root.centre()
-    Root.mainloop()
+    Root.run()

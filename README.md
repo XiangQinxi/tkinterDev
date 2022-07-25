@@ -5,7 +5,7 @@ ____
 ## 版本信息
 请使用最新的稳定版，虽然最新版可以用，但不排除会出现一些不可免得错误，大版本更新有时会出现BUG，但是小版本可以考虑，因为小版本是对大版本的优化和改正，请按照下方标准进行安装。🐋🐳🐋🐳
 - 不稳定版本 1.0.0 - 1.5.0 1.8.3 - 1.8.4
-- 最新稳定版本 1.9.1
+- 最新稳定版本 2.1.6
 - 最低稳定版本 1.6.0
  
 1.6.0 稳定版发布。
@@ -45,6 +45,22 @@ ____
 2.0.3 修正错误。
 
 2.0.4 修正错误。
+
+2.0.6 添加图标，从tkdev.devicon里导入
+
+2.1.0 优化代码，去除大量的windll代码，改用win32代码。添加window_custom函数，window参数输入tkinter.Tk窗口，即可使用win32去除窗口（因为可以用overrideredirect来自定义），所以还是摆在那，想用就用。添加window_embed函数，window填入tkinter.Tk窗口，toplevel填入tkinter.Toplevel窗口，即可使用系统的嵌套子系统。
+
+2.1.1 添加window_custom_border_taskbar可以实现真正的自定义窗口。
+
+2.1.2 添加window_minbox、window_maxbox。
+
+2.1.3 添加devcore.DevSysTray组件，需安装pystray库使用
+
+2.1.4 修正BUG
+
+2.1.5 添加Stack组件
+
+2.1.6 添加window_pos方法，可以快速移动窗口位置。添加taskbar_height参数快速获取任务栏高度。
 ____
 
 ## devdemo
