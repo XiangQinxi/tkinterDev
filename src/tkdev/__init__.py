@@ -17,7 +17,8 @@ try:
 except ImportError:
     pass
 
-windll.user32.SetProcessDPIAware()
+windll.shcore.SetProcessDpiAwareness(1)
+ScaleFactor = windll.shcore.GetScaleFactorForDevice(0)
 
 taskbar_height = GetMonitorInfo(MonitorFromPoint((0, 0))).get("Monitor")[3] - \
                  GetMonitorInfo(MonitorFromPoint((0, 0))).get("Work")[3]
@@ -117,12 +118,14 @@ def window_add_taskbar(window: tk.Tk):
     window.after(1, lambda: window.wm_deiconify())
 
 
-def window_embed(window: tk.Tk, toplevel: tk.Toplevel):
+def window_embed(window: tk.Tk, toplevel: tk.Toplevel, iswindow: bool = True):
     def embed():
         SetParent(GetParent(toplevel.winfo_id()), window.winfo_id())
-        window.attributes("-topmost", False)
-
-    window.attributes("-topmost", True)
+        toplevel.deiconify()
+        if iswindow:
+            window.attributes("-topmost", False)
+    if iswindow:
+        window.attributes("-topmost", True)
     window.after(1, embed)
 
 
@@ -607,19 +610,19 @@ class DevTitleBar(tk.Frame):
 
     def add_close(self, close_bg="#ffffff", close_fg="#000000", close_active_bg="#e81123", close_active_fg="#f5f5f5",
                   close_func=None):
-        self.closebutton = tk.Button(self, text='×', borderwidth=0, background=close_bg, foreground=close_fg,
+        self.closebutton = tk.Button(self, text='×', borderwidth=0, background=close_bg, foreground=close_fg, font=("微软雅黑", 13),
                                      activebackground=close_active_bg, command=close_func,
                                      activeforeground=close_active_fg)
         self.closebutton.pack(fill=tk.Y, side=self.button_side, ipadx=5)
 
     def add_max(self, max_bg="#ffffff", max_fg="#000000", max_active_bg="#c2c2c2", max_active_fg="#ffffff"):
-        self.maxbutton = tk.Button(self, text="▢", borderwidth=0, background=max_bg, foreground=max_fg,
+        self.maxbutton = tk.Button(self, text="▢", borderwidth=0, background=max_bg, foreground=max_fg, font=("微软雅黑", 13),
                                    activebackground=max_active_bg,
                                    activeforeground=max_active_fg)
         self.maxbutton.pack(fill=tk.Y, side=self.button_side, ipadx=5)
 
     def add_min(self, min_bg="#ffffff", min_fg="#000000", min_active_bg="#c2c2c2", min_active_fg="#ffffff"):
-        self.minbutton = tk.Button(self, text="-", borderwidth=0, background=min_bg, foreground=min_fg,
+        self.minbutton = tk.Button(self, text="-", borderwidth=0, background=min_bg, foreground=min_fg, font=("微软雅黑", 13),
                                    activebackground=min_active_bg,
                                    activeforeground=min_active_fg)
         self.minbutton.pack(fill=tk.Y, side=self.button_side, ipadx=8)
@@ -633,19 +636,10 @@ class DevTitleBar(tk.Frame):
     def widget_max(self):
         if self.iswindow:
             if self.ismax:
-                self.window.geometry(f"{self._width}x{self._height}+{self._x}+{self._y}")
+                self.window.state("normal")
                 self.ismax = False
             elif not self.ismax:
-                self._x = self.window.winfo_x()
-                self._y = self.window.winfo_y()
-                self._width = self.window.winfo_width()
-                self._height = self.window.winfo_height()
-                monitor_info = GetMonitorInfo(MonitorFromPoint((0, 0)))
-                work_area = monitor_info.get("Work")
-                self.window.geometry(f"{work_area[2]}x{work_area[3]}+0+0")
-                self.window.attributes('-topmost', 1)
-                self.window.attributes('-topmost', 0)
-                self.window.geometry("+0+0")
+                self.window.state("zoomed")
                 self.ismax = True
             self.window.update()
         if not self.iswindow:
@@ -666,32 +660,10 @@ class DevTitleBar(tk.Frame):
 
     def widget_min(self):
         if self.iswindow:
-            windowsize = (self.window.winfo_width(), self.window.winfo_height())
-            self.window.withdraw()
-            self.minwindow = DevToplevel()
-            self.minwindow.configure(background=self.window.cget("background"))
-            self.minwindow.geometry(f"50x50+{windowsize[0]}+{windowsize[1]}")
-            self.minwindow.overrideredirect(True)
-            if self.minwindow_icon is None:
-                pass
-            else:
-                self.image = tk.Label(self.minwindow, image=tk.PhotoImage(file=self.minwindow_icon))
-                self.image.pack(fill=tk.BOTH, expand=tk.YES, padx=5, pady=5)
-            resize = DevBorder(self.minwindow, border_color=self.minwindow_border_color)
-            add_taskbar(self.minwindow)
-            self.minwindow.attributes("-topmost", True)
-            DevDrag(self.minwindow, self.minwindow, iswindow=True)
-
-            def show_window(evt):
-                self.window.deiconify()
-                self.window.attributes("-topmost", True)
-                self.minwindow.destroy()
-                self.window.attributes("-topmost", False)
-
-            self.minwindow.bind("<Double-Button-1>", show_window)
-        if not self.iswindow:
+            self.window.state("iconic")
+        elif not self.iswindow:
             try:
-                self.window.withdraw()
+                self.widget.forget()
             except tk.TclError:
                 pass
 
@@ -723,77 +695,10 @@ class DevToast(tk.Toplevel):
         self.attributes("-topmost", True)
 
 
-class DevToplevel(tk.Toplevel):
-    def __init__(self, master: tk.Tk = None):
-        super(DevToplevel, self).__init__(master=master)
-        self.title("")
-        self.geometry("630x300")
-        self.configure(background="#ffffff")
-        self.iconbitmap(Icon_Empty)
-
-    def wm_remove_titlebar(self):
-        self.after(0, lambda: window_custom_border_taskbar(self))
-
-    remove_titlebar = wm_remove_titlebar
-
-    def wm_remove_titlebar_none_border(self):
-        window_custom_taskbar(self)
-
-    remove_titlebar_none_border = wm_remove_titlebar_none_border
-
-    def wm_run(self):
-        try:
-            self.mainloop()
-        except tk.TclError:
-            return False
-        else:
-            return True
-
-    run = wm_run
-
-    def wm_statusbar(self, statusBar: tk.Widget = None):
-        self._statusBar = statusBar
-        self._statusBar.pack(fill=tk.X, side=tk.BOTTOM)
-        return self._statusBar
-
-    statusbar = wm_statusbar
-
-    def wm_titlebar(self, titleBar: tk.Label = None, overtitlebar: bool = True, border: bool = True):
-        self.minsize(100, 30)
-        if overtitlebar:
-            window_add_taskbar(self)
-        if border:
-            self.remove_titlebar()
-        self._titlebar = titleBar
-        self._titlebar.pack(fill=tk.X, side=tk.TOP)
-        DevDrag(self._titlebar, self, True)
-        return self._titlebar
-
-    titlebar = wm_titlebar
-
-    def wm_menubar(self, menubar: DevMenuBar = None):
-        menubar.show()
-
-    menubar = wm_menubar
-
-    def wm_centre(self):
-        self.after(1, lambda evt=None: window_centre(self))
-
-    centre = wm_centre
-
-    def min_window(self):
-        self.withdraw()
-        self.minwindow = DevToplevel(self)
-        self.minwindow.overrideredirect(True)
-        self.minwindow.attributes("-topmost", True)
-        DevDrag(self.minwindow, self.minwindow, iswindow=True)
-        self.minwindow.bind("<Double-Button-1>", lambda evt: self.deiconify())
-
-
 class DevWindow(tk.Tk):
-    def __init__(self):
+    def __init__(self, title: str = ""):
         super(DevWindow, self).__init__()
-        self.title("")
+        self.title(title)
         self.geometry("630x300")
         self.configure(background="#ffffff")
         self.iconbitmap(Icon_Empty)
@@ -844,14 +749,23 @@ class DevWindow(tk.Tk):
     centre = wm_centre
 
     def min_window(self):
-        self.withdraw()
-        self.minwindow = DevToplevel(self)
-        self.minwindow.overrideredirect(True)
-        self.minwindow.attributes("-topmost", True)
-        DevDrag(self.minwindow, self.minwindow, iswindow=True)
-        self.minwindow.bind("<Double-Button-1>", lambda evt: self.deiconify())
+        self.state("iconic")
+
+    def dpi(self):
+        self.tk.call('tk', 'scaling', ScaleFactor/75)
+
+
+class DevToplevel(tk.Toplevel, DevWindow):
+    def __init__(self, master: tk.Tk = None, title: str = ""):
+        super(DevToplevel, self).__init__(master=master)
+        self.title(title)
+        self.geometry("630x300")
+        self.configure(background="#ffffff")
+        self.iconbitmap(Icon_Empty)
 
 
 if __name__ == '__main__':
     Root = DevWindow()
+    TitleBar = DevTitleBar(Root, iswindow=True, window=Root)
+    Root.titlebar(TitleBar, overtitlebar=False)
     Root.run()

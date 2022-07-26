@@ -61,6 +61,8 @@ ____
 2.1.5 添加Stack组件
 
 2.1.6 添加window_pos方法，可以快速移动窗口位置。添加taskbar_height参数快速获取任务栏高度。
+
+2.1.7 添加devwin包，里面将是使用win32开发的组件。WinMDIWindow组件可以将TopLevel组件嵌入容器
 ____
 
 ## devdemo
